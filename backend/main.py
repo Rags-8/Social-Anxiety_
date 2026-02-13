@@ -10,6 +10,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 # --- MongoDB Configuration ---
+import certifi
+
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
     "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?retryWrites=true&w=majority"
@@ -17,12 +19,14 @@ MONGODB_URI = os.getenv(
 DB_NAME = "social_anxiety_db"
 COLLECTION_NAME = "chat_collection"
 
-# Connect to MongoDB
+# Connect to MongoDB with SSL Context
 try:
-    client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+    print(f"🔄 Attempting to connect to MongoDB...")
+    client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where())
     db = client[DB_NAME]
     chat_collection = db[COLLECTION_NAME]
-    client.server_info()  # triggers exception if connection fails
+    # Trigger a real connection check
+    client.admin.command('ping')
     print(f"✅ Connected to MongoDB: {DB_NAME}.{COLLECTION_NAME}")
 except Exception as e:
     print(f"❌ MongoDB connection failed: {e}")

@@ -6,4 +6,5 @@ joblib
 pymongo
 motor
 python-multipart
-# requests and python-dotenv removed as they're standard/unused
+certifi
+dnspython
