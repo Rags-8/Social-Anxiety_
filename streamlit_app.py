@@ -32,19 +32,20 @@ try:
     elif os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        API_URL = "http://127.0.0.1:8000"
+        # Default to production Vercel backend
+        API_URL = "https://social-anxiety-detection.vercel.app"
 except FileNotFoundError:
     # st.secrets might raise FileNotFoundError locally if .streamlit/secrets.toml doesn't exist
     if os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        API_URL = "http://127.0.0.1:8000"
+        API_URL = "https://social-anxiety-detection.vercel.app"
 except Exception:
     # Fallback for any other access issues
     if os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        API_URL = "http://127.0.0.1:8000"
+        API_URL = "https://social-anxiety-detection.vercel.app"
 USER_ID = "guest_streamlit"  # Fixed user for demo
 
 # -----------------------------------------------------------------------------

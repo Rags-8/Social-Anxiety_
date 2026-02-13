@@ -154,3 +154,58 @@ async def predict_anxiety(input_data: UserInput = Body(...)):
             print(f"❌ Failed to save chat: {e}")
 
     return {"anxiety_level": prediction, "explanation": explanation, "suggestions": suggestions}
+
+@app.get("/history/{user_id}")
+async def get_history(user_id: str):
+    if chat_collection is None:
+        return []
+    try:
+        # Fetch all chats for the user, sorted by newest first
+        # Note: If user_id is 'guest_streamlit' or similar, we might want to filter.
+        # Ideally filter by user_id: {"user_id": user_id}
+        # But if the app uses a shared DB for demo, maybe return all?
+        # The Streamlit app sends a specific USER_ID. Let's filter by it.
+        # If user_id is "all", we return all.
+        
+        filter_query = {} if user_id == "all" else {"user_id": user_id}
+        
+        # Fallback: if user_id is strictly required by logic but Streamlit sends generic "guest_streamlit",
+        # ensure we catch data even if saved under different IDs if desired? 
+        # No, strict filtering is better for a real app.
+        
+        chats = list(chat_collection.find(filter_query).sort("timestamp", -1))
+        return [chat_helper(chat) for chat in chats]
+    except Exception as e:
+        print(f"Error fetching history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/delete_chat/{chat_id}")
+async def delete_chat_endpoint(chat_id: str):
+    if chat_collection is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    try:
+        result = chat_collection.delete_one({"_id": ObjectId(chat_id)})
+        if result.deleted_count > 0:
+            return {"message": "Chat deleted"}
+        raise HTTPException(status_code=404, detail="Chat not found")
+    except Exception as e:
+        print(f"Error deleting chat: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/get_insights/{user_id}")
+async def get_insights(user_id: str):
+    if chat_collection is None:
+        return {"low": 0, "moderate": 0, "high": 0}
+    try:
+        # Filter by user_id
+        filter_query = {} if user_id == "all" else {"user_id": user_id}
+        
+        chats = list(chat_collection.find(filter_query))
+        low = sum(1 for c in chats if "Low" in c.get("anxiety_level", ""))
+        mod = sum(1 for c in chats if "Moderate" in c.get("anxiety_level", ""))
+        high = sum(1 for c in chats if "High" in c.get("anxiety_level", ""))
+        
+        return {"low": low, "moderate": mod, "high": high}
+    except Exception as e:
+        print(f"Error generating insights: {e}")
+        return {"low": 0, "moderate": 0, "high": 0}
