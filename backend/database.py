@@ -42,7 +42,7 @@ def delete_chat(id: str):
     Deletes a chat message by its ID.
     """
     try:
-        if chats_collection:
+        if chats_collection is not None:
             chats_collection.delete_one({"_id": ObjectId(id)})
             return True
         return False

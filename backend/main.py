@@ -173,7 +173,7 @@ async def predict_anxiety(input_data: UserInput = Body(...)):
         explanation = f"Based on your input, the model predicts {anxiety_level}. {phrase}"
 
         # Autosave to MongoDB if connected
-        if chat_collection:
+        if chat_collection is not None:
             try:
                  chat_entry = {
                     "user_id": input_data.user_id,
