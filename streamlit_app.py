@@ -32,20 +32,20 @@ try:
     elif os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        # Default to production Vercel backend
-        API_URL = "https://social-anxiety-detection.vercel.app"
+        # Default to Render backend (User Provided)
+        API_URL = "https://social-anxiety-fj8w.onrender.com"
 except FileNotFoundError:
     # st.secrets might raise FileNotFoundError locally if .streamlit/secrets.toml doesn't exist
     if os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        API_URL = "https://social-anxiety-detection.vercel.app"
+        API_URL = "https://social-anxiety-fj8w.onrender.com"
 except Exception:
     # Fallback for any other access issues
     if os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        API_URL = "https://social-anxiety-detection.vercel.app"
+        API_URL = "https://social-anxiety-fj8w.onrender.com"
 USER_ID = "guest_streamlit"  # Fixed user for demo
 
 # -----------------------------------------------------------------------------
