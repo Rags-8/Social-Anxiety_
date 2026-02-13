@@ -8,8 +8,8 @@ if exist ".venv\Scripts\activate.bat" (
     call ".venv\Scripts\activate.bat"
 )
 
-echo [INFO] Installing/Updating Streamlit dependencies...
-pip install streamlit requests
+echo [INFO] Installing/Updating dependencies...
+pip install -r requirements.txt
 
 echo.
 echo [INFO] Starting Backend Server...
@@ -20,5 +20,6 @@ timeout /t 5 /nobreak >nul
 echo.
 echo [INFO] Launching Streamlit...
 start http://localhost:8501
+set API_URL=http://127.0.0.1:8000
 python -m streamlit run streamlit_app.py --server.headless true
 pause

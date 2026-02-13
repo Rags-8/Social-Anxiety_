@@ -32,7 +32,7 @@ try:
     elif os.getenv("API_URL"):
         API_URL = os.getenv("API_URL")
     else:
-        # Default to Render backend (User Provided)
+        # Default to Render backend (Production)
         API_URL = "https://social-anxiety-fj8w.onrender.com"
 except FileNotFoundError:
     # st.secrets might raise FileNotFoundError locally if .streamlit/secrets.toml doesn't exist

@@ -21,15 +21,15 @@ COLLECTION_NAME = "chat_collection"
 
 # Connect to MongoDB with SSL Context
 try:
-    print(f"🔄 Attempting to connect to MongoDB...")
+    print(f"[INFO] Attempting to connect to MongoDB...")
     client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000, tlsCAFile=certifi.where())
     db = client[DB_NAME]
     chat_collection = db[COLLECTION_NAME]
     # Trigger a real connection check
     client.admin.command('ping')
-    print(f"✅ Connected to MongoDB: {DB_NAME}.{COLLECTION_NAME}")
+    print(f"[SUCCESS] Connected to MongoDB: {DB_NAME}.{COLLECTION_NAME}")
 except Exception as e:
-    print(f"❌ MongoDB connection failed: {e}")
+    print(f"[ERROR] MongoDB connection failed: {e}")
     chat_collection = None
 
 # --- Database Helper ---
@@ -153,9 +153,9 @@ async def predict_anxiety(input_data: UserInput = Body(...)):
                 "timestamp": datetime.utcnow()
             }
             result = chat_collection.insert_one(chat_entry)
-            print(f"✅ Saved chat: {result.inserted_id}")
+            print(f"[SUCCESS] Saved chat: {result.inserted_id}")
         except Exception as e:
-            print(f"❌ Failed to save chat: {e}")
+            print(f"[ERROR] Failed to save chat: {e}")
 
     return {"anxiety_level": prediction, "explanation": explanation, "suggestions": suggestions}
 

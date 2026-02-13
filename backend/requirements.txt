@@ -1,11 +1,17 @@
+streamlit
 fastapi
 uvicorn
+pandas
 numpy
 scikit-learn
-joblib
+nltk
 pymongo
-motor
 python-multipart
+joblib
+motor
+requests
+matplotlib
+seaborn
+python-dotenv
 certifi
 dnspython
-# Render fix trigger
