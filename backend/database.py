@@ -3,7 +3,8 @@ import os
 from bson.objectid import ObjectId
 
 # User-provided connection URI (used as fallback or default)
-HARDCODED_URI = "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?retryWrites=true&w=majority"
+# User-provided connection URI (used as fallback or default)
+HARDCODED_URI = "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?appName=Cluster0"
 
 # Correct Logic: Check environment variable first, else use the hardcoded string
 MONGODB_URI = os.getenv("MONGODB_URI", HARDCODED_URI)
