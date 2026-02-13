@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+numpy
+scikit-learn
+joblib
+pymongo
+motor
+python-multipart
+certifi
+dnspython
+# Render fix trigger
