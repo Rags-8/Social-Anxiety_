@@ -2,18 +2,25 @@ from pymongo import MongoClient
 import os
 from bson.objectid import ObjectId
 
-# 1. MongoDB Connection
-# Check for environment variable first (Best Practice for Vercel)
-# Fallback to the hardcoded string if env var is missing (User provided string)
-DEFAULT_URI = "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?retryWrites=true&w=majority"
-MONGODB_URI = os.getenv("MONGODB_URI", DEFAULT_URI)
+# User-provided connection URI (used as fallback or default)
+HARDCODED_URI = "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?retryWrites=true&w=majority"
 
-client = MongoClient(MONGODB_URI)
+# Correct Logic: Check environment variable first, else use the hardcoded string
+MONGODB_URI = os.getenv("MONGODB_URI", HARDCODED_URI)
 
-db = client["social_anxiety_db"] 
-chats_collection = db["chat_collection"]
+chats_collection = None
 
-# 2. Helper Functions (Required by backend/main.py)
+try:
+    client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+    db = client["social_anxiety_db"]
+    chats_collection = db["chat_collection"]
+    print("MongoDB connection successful")
+except Exception as e:
+    print(f"MongoDB connection failed: {e}")
+    chats_collection = None
+
+# --- Helper Functions (Required by backend/main.py) ---
+# Added these back because removing them will crash the app (ImportError in main.py)
 
 def chat_helper(chat) -> dict:
     """
@@ -34,8 +41,10 @@ def delete_chat(id: str):
     Deletes a chat message by its ID.
     """
     try:
-        chats_collection.delete_one({"_id": ObjectId(id)})
-        return True
+        if chats_collection:
+            chats_collection.delete_one({"_id": ObjectId(id)})
+            return True
+        return False
     except Exception as e:
         print(f"Error deleting chat: {e}")
         return False
