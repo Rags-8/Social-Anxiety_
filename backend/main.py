@@ -31,27 +31,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load Model and Vectorizer
-# Use absolute paths for robust loading in serverless environments
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "models", "anxiety_model.pkl")
-VECTORIZER_PATH = os.path.join(BASE_DIR, "models", "tfidf_vectorizer.pkl")
-
 # Global variables for lazy loading
 model = None
 vectorizer = None
+
+def get_model_path(filename):
+    # Strategy 1: Relative to this file (backend/main.py)
+    base_dir_1 = os.path.dirname(os.path.abspath(__file__))
+    path_1 = os.path.join(base_dir_1, "models", filename)
+    if os.path.exists(path_1):
+        return path_1
+    
+    # Strategy 2: Relative to Current Working Directory (Project Root)
+    # Vercel entry point is usually at root, so CWD might be root.
+    cwd = os.getcwd()
+    path_2 = os.path.join(cwd, "backend", "models", filename)
+    if os.path.exists(path_2):
+        return path_2
+        
+    print(f"Warning: Model file {filename} not found at {path_1} or {path_2}")
+    print(f"CWD: {cwd}")
+    try:
+        print(f"Directory listing of {base_dir_1}: {os.listdir(base_dir_1)}")
+        print(f"Directory listing of {os.path.join(base_dir_1, 'models')}: {os.listdir(os.path.join(base_dir_1, 'models'))}")
+    except:
+        pass
+    return path_1 # Return default to let calling function fail with path log
 
 def get_model():
     global model, vectorizer
     if model is None or vectorizer is None:
         try:
-            model = joblib.load(MODEL_PATH)
-            vectorizer = joblib.load(VECTORIZER_PATH)
+            model_path = get_model_path("anxiety_model.pkl")
+            vectorizer_path = get_model_path("tfidf_vectorizer.pkl")
+            
+            print(f"Loading model from: {model_path}")
+            print(f"Loading vectorizer from: {vectorizer_path}")
+            
+            model = joblib.load(model_path)
+            vectorizer = joblib.load(vectorizer_path)
             print("Model and Vectorizer loaded successfully.")
         except Exception as e:
             print(f"Error loading model: {e}")
-            raise HTTPException(status_code=500, detail="Model loading failed")
+            raise HTTPException(status_code=500, detail=f"Model loading failed: {str(e)}")
     return model, vectorizer
+
+
 
 # Data Models
 class UserInput(BaseModel):
