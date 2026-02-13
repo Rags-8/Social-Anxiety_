@@ -140,52 +140,63 @@ async def root():
 
 @app.post("/predict", response_model=ChatResponse)
 async def predict_anxiety(input_data: UserInput = Body(...)):
-    if check_harmful_content(input_data.text):
-        return {
-            "anxiety_level": "High Anxiety",
-            "explanation": "Please prioritize your safety. Reach out to a professional.",
-            "suggestions": ["Call emergency services", "Contact a trusted friend"]
-        }
-
-    # Lazy load model
-    model, vectorizer = get_model()
-
-    if not model or not vectorizer:
-        raise HTTPException(status_code=500, detail="Model not loaded")
-    
-    clean_input = clean_text(input_data.text)
-    if not clean_input:
-         raise HTTPException(status_code=400, detail="Input text is empty")
-
-    vectorized_text = vectorizer.transform([clean_input])
-    prediction = model.predict(vectorized_text)[0]
-    anxiety_level = prediction
-    
-    suggestions = get_suggestions(anxiety_level)
-    
-    phrases = empathy_map.get(anxiety_level, [""])
-    phrase = random.choice(phrases) if phrases else ""
-    explanation = f"Based on your input, the model predicts {anxiety_level}. {phrase}"
-
-    # Autosave to MongoDB if connected
-    if chat_collection:
-        try:
-             chat_entry = {
-                "user_id": input_data.user_id,
-                "message": input_data.text,
-                "response": explanation,
-                "anxiety_level": anxiety_level,
-                "suggestions": suggestions,
-                "timestamp": datetime.utcnow()
+    try:
+        if check_harmful_content(input_data.text):
+            return {
+                "anxiety_level": "High Anxiety",
+                "explanation": "Please prioritize your safety. Reach out to a professional.",
+                "suggestions": ["Call emergency services", "Contact a trusted friend"]
             }
-             chat_collection.insert_one(chat_entry)
-        except Exception as e:
-            print(f"Error saving chat: {e}")
 
-    return {
-        "anxiety_level": anxiety_level,
-        "explanation": explanation,
-        "suggestions": suggestions
-    }
+        # Lazy load model with detailed error capture
+        try:
+            model, vectorizer = get_model()
+        except Exception as e:
+            # Re-raise so it's caught by the outer block but with context
+            raise HTTPException(status_code=500, detail=f"Model loading failed: {str(e)}")
+
+        if not model or not vectorizer:
+            raise HTTPException(status_code=500, detail="Model objects are None after loading")
+        
+        clean_input = clean_text(input_data.text)
+        if not clean_input:
+             raise HTTPException(status_code=400, detail="Input text is empty")
+
+        vectorized_text = vectorizer.transform([clean_input])
+        prediction = model.predict(vectorized_text)[0]
+        anxiety_level = prediction
+        
+        suggestions = get_suggestions(anxiety_level)
+        
+        phrases = empathy_map.get(anxiety_level, [""])
+        phrase = random.choice(phrases) if phrases else ""
+        explanation = f"Based on your input, the model predicts {anxiety_level}. {phrase}"
+
+        # Autosave to MongoDB if connected
+        if chat_collection:
+            try:
+                 chat_entry = {
+                    "user_id": input_data.user_id,
+                    "message": input_data.text,
+                    "response": explanation,
+                    "anxiety_level": anxiety_level,
+                    "suggestions": suggestions,
+                    "timestamp": datetime.utcnow()
+                }
+                 chat_collection.insert_one(chat_entry)
+            except Exception as e:
+                print(f"Error saving chat: {e}")
+                # Don't crash request if DB fails, just log it.
+
+        return {
+            "anxiety_level": anxiety_level,
+            "explanation": explanation,
+            "suggestions": suggestions
+        }
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"CRITICAL ERROR in /predict: {error_details}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}. Traceback: {error_details}")
 
 # Keep other endpoints if needed for history/insights, but sticking to core requirements first.
