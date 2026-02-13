@@ -136,7 +136,7 @@ def check_harmful_content(text):
 
 @app.get("/")
 async def root():
-    return {"message": "Social Anxiety Detection API is running"}
+    return {"message": "Social Anxiety Detection API is running (v2)"}
 
 @app.post("/predict", response_model=ChatResponse)
 async def predict_anxiety(input_data: UserInput = Body(...)):
