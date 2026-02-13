@@ -7,7 +7,19 @@
   ],
   "routes": [
     {
+      "src": "/predict",
+      "methods": [
+        "POST"
+      ],
+      "dest": "api/index.py"
+    },
+    {
       "src": "/(.*)",
+      "methods": [
+        "GET",
+        "POST",
+        "OPTIONS"
+      ],
       "dest": "api/index.py"
     }
   ]
