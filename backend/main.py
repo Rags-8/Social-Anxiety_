@@ -14,7 +14,7 @@ import certifi
 
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
-    "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?retryWrites=true&w=majority"
+    "mongodb+srv://RaghaviSai123:Raghavi123@cluster0.aydji1p.mongodb.net/social_anxiety_db?appName=Cluster0"
 )
 DB_NAME = "social_anxiety_db"
 COLLECTION_NAME = "chat_collection"
@@ -210,6 +210,10 @@ async def get_insights(user_id: str):
         high = sum(1 for c in chats if "High" in c.get("anxiety_level", ""))
         
         return {"low": low, "moderate": mod, "high": high}
+    except Exception as e:
+        print(f"Error generating insights: {e}")
+        return {"low": 0, "moderate": 0, "high": 0}
+
     except Exception as e:
         print(f"Error generating insights: {e}")
         return {"low": 0, "moderate": 0, "high": 0}

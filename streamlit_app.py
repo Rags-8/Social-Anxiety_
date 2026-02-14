@@ -569,7 +569,7 @@ with st.sidebar:
     
     # Use key="page" to sync with session state
     selection = st.radio(
-        "",
+        "Navigation",
         ["Home", "Chat", "History", "Insights"],
         key="page",
         label_visibility="collapsed",
@@ -650,7 +650,7 @@ elif st.session_state.page == "Chat":
     c_pad1, c_main, c_pad2 = st.columns([1, 6, 1])
     
     with c_main:
-        user_input = st.text_area("", placeholder="Type your thoughts here...", height=150)
+        user_input = st.text_area("Your Message", placeholder="Type your thoughts here...", height=150, label_visibility="collapsed")
         
         if st.button("Analyze", use_container_width=True):
             if not user_input.strip():
